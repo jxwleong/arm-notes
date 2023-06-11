@@ -390,8 +390,18 @@ The figure above shows that the AHB protocol allows slaves to introduce wait sta
 
 <br/>
 
-Example:
-Suppose the master wants to write the data '1234' to address '0x2000'. It would do this by placing '0x2000' onto `HADDR`, setting `HWRITE` to HIGH, and placing '1234' onto `HWDATA`. The master would then wait for `HREADY` to be asserted to HIGH by the slave, indicating that the slave is ready to accept the data. Once `HREADY` is HIGH, the master checks `HRESP` to see if the operation was successful (i.e., `HRESP` equals `OKAY`). If there was an error (i.e., `HRESP` equals `ERROR`), the master would know that the write operation did not proceed as expected.
+**Example of a Basic Write Operation:**
+
+Consider a master wants to write the data '1234' to the memory address '0x2000'.
+
+1. **Cycle 1**: The master sets `HADDR` to '0x2000', `HWRITE` to HIGH (indicating a write operation), and `HWDATA` to '1234'.
+2. **Cycle 2**: The master waits for `HREADY` to be asserted HIGH by the slave, indicating readiness for data reception.
+3. **Cycle 3**: Once `HREADY` is HIGH, the master checks `HRESP` to see if the operation was successful:
+    - `OKAY`: Transaction was successful, data has been written to the slave.
+    - `ERROR`: An error occurred, the master will handle the error or retry the transaction.
+    - `SPLIT`: Slave is busy, master will redo the transaction later.
+    - `RETRY`: Slave suggests to retry the transaction later.
+
 
 
 
