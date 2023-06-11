@@ -162,7 +162,7 @@ Furthermore, AHB employs pipelining and supports burst transfers, enabling it to
 <br/><br/>
 
 <!-- omit in toc -->
-## <a name="amba-ahb-signals"></a> AMBA AHB Signal List[<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
+## <a name="amba-ahb-signals"></a> AMBA AHB Signal List [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
 
 
 | Signal Name  | Source | Description |
@@ -255,9 +255,49 @@ The AMBA AHB Slave responds to transactions initiated by the AHB master on the A
 
 Examples of AHB slave components in an SoC can include memory modules like RAM or ROM, input/output interfaces, or any other peripheral that needs to respond to data transfers on the bus. Each of these components can act as an AHB slave when the master reads from or writes to them. The exact implementation of the slave can vary based on the specific requirements of these components.
 
-<!-- omit in toc -->
+ 
 <br/><br/>
 
+
+<!-- omit in toc -->
+### <a name="amba-ahb-basic-transfer"></a> AMBA AHB Basic Transfer [<sub><sup>Back to Table of Contents</sup></sub>](#toc)   
+<p align="center">
+  <img src="./images/amba_ahb_simple_transfer.jpg" alt="AMBA Basic Transfer">
+  <br>
+    <a href="http://contents.kocw.net/KOCW/document/2014/sungkyunkwan/hantaehee/4.pdf">AMBA AHB Basic Transfer</a>
+</p>
+<br/>  
+In AMBA AHB (Advanced Microcontroller Bus Architecture Advanced High-performance Bus), the communication or data transfer process can be divided into two main phases: the address phase and the data phase.
+  
+<br/>  
+
+1. **Address Phase**
+   - This is the initial phase of any data transfer where the master places the address and control signals on the bus.
+   - Address signal `HADDR`, control signal `HTRANS`, and write data signal `HWDATA` (for write operations) are asserted.
+   - Only one address phase occurs at a time, always followed by a data phase.
+
+2. **Data Phase**
+   - This phase occurs after the address phase and is where the actual data transfer happens.
+   - During a read operation, the slave places the requested data on `HRDATA`.
+   - During a write operation, the master places the write data on `HWDATA`.
+   - A single address phase can be followed by multiple data phases during a burst transfer.
+
+These two phases together make a complete transaction on the bus. AMBA AHB supports various data transfer types such as single transfers (one address phase, one data phase) and burst transfers (one address phase, multiple data phases).  
+<br/>
+In the figure above:
+
+- The `HWDATA` line represents the data being sent from the master to the slave. The specific data is placed on the `HWDATA` bus when the transfer begins.
+
+- Concurrently, the `HWRITE` line (a part of the control signals) indicates the type of operation. If `HWRITE` is HIGH, it's a write operation from the master to the slave. If `HWRITE` is LOW, it's a read operation from the slave to the master.
+
+- During a **write operation**, the slave consumes the data from the `HWDATA` bus once the `HREADY` signal is asserted by the slave. The `HREADY` signal being set to '1' indicates that the slave has completed processing the current transfer and is ready for the next one. If the slave were a slower component and needed more time to process the transfer, it would set `HREADY` to '0', effectively stalling the bus until it was ready to handle the next transfer.
+
+- During a **read operation**, the slave puts the requested data onto the `HRDATA` line following the assertion of `HREADY`. This represents data being sent from the slave back to the master.
+
+This sequence of events illustrates the flow of data transfers on the AHB bus, where the type of operation (read or write) is dictated by the `HWRITE` signal and the pace of transfer is controlled by the `HREADY` signal.
+
+
+<br/><br/>
 <!-- omit in toc -->
 ## <a name="perf_metrics"></a> Performance Metrics and Timing Concepts in Circuits [<sub><sup>Back to Table of Contents</sup></sub>](#toc)
 --- 
