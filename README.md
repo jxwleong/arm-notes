@@ -9,6 +9,7 @@
      - [AMBA AHB Signal List](#amba-ahb-signals)
      - [AMBA AHB Master](#amba-ahb-master)
      - [AMBA AHB Slave](#amba-ahb-slave)
+     - [AMBA AHB Basic Transfer](#amba-ahb-basic-transfer)
    
 -  [Performance Metrics and Timing Concepts in Circuits](#perf_metrics)
    
