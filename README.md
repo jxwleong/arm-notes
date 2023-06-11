@@ -124,6 +124,14 @@ This way, AMBA bus enables efficient communication between the CPU and the USB c
     <a href="http://contents.kocw.net/KOCW/document/2014/sungkyunkwan/hantaehee/4.pdf">AMBA AHB Architecture</a>
 </p>
 <br/>  
+<p align="center">
+  <img src="./images/amba_ahb_high_level.png" alt="AMBA AHB Architecture">
+  <br>
+    <a href="https://dxsm.github.io/p/ahb-protocal.html">AMBA AHB Architecture</a>
+</p>
+<br/>  
+
+
 The Advanced High-performance Bus (AHB) is a part of ARM's Advanced Microcontroller Bus Architecture (AMBA). AHB is designed for high-performance system modules and is used in high-speed systems.
 
 AHB's primary role is to connect high bandwidth components such as CPUs, DSPs, and memory elements to the system bus. By doing so, AHB acts as a high-performance system backbone bus, supporting efficient communication between these components.
