@@ -300,6 +300,119 @@ This sequence of events illustrates the flow of data transfers on the AHB bus, w
 
 <br/><br/>
 <!-- omit in toc -->
+### <a name="a"></a> AMBA AHB Basic Read Transaction [<sub><sup>Back to Table of Contents</sup></sub>](#toc)   
+<p align="center">
+  <img src="./images/amba_ahb_block_master_read.jpg" alt="AMBA Basic Read Signals">
+  <br>
+    <a href="http://contents.kocw.net/KOCW/document/2014/sungkyunkwan/hantaehee/4.pdf">AMBA Basic Read Signals</a>
+</p>
+<br/>  
+
+During a basic AHB read:
+
+- `HADDR`: This is the address bus, which is driven by the master (the entity initiating the transaction). In a read operation, the master will put the desired address onto the `HADDR` line to tell the slave (the entity responding to the transaction) from where to read data.
+  
+- `HRDATA`: Once the slave has processed the read request (which could potentially take multiple clock cycles if it is a slow peripheral), it places the requested data onto the `HRDATA` bus and asserts the `HREADY` signal. The master, once seeing that `HREADY` is '1', will then latch the data from `HRDATA`.
+
+- `HREADY`: This is the signal that the slave uses to indicate that it is ready for a data transfer. In the beginning, the master does not need to check the status of `HREADY`. The master simply places the address on `HADDR` and asserts the control signals for a read operation. However, after this, the master must wait until `HREADY` is '1' (indicating that the slave is ready) before it can consider the read transaction complete.
+
+- `HRESP`: This is the response from the slave, typically indicating the status of the transaction. The possible responses are:
+
+    - `OKAY` signifies a successful transaction. Most slaves will always return `OKAY` unless there is some sort of bus error.
+
+    - `ERROR` indicates that the transaction was unsuccessful due to a bus error or some other issue at the slave's end.
+
+    - `SPLIT`. This informs the master that the transaction will be "split" and completed later when the slave is free. The master should then terminate the current transaction and attempt it again later. In a typical read operation, the master will check HRESP after HREADY has been asserted to ensure that the read was successful.
+
+    - `RETRY` signals the master to attempt the same transaction again later. This typically happens when the slave is temporarily unable to handle the transaction but might be able to do so later.
+
+In a typical read operation, the master will check `HRESP` after `HREADY` has been asserted to ensure that the read was successful and take appropriate actions based on the response.
+
+
+To summarize, a basic read operation involves the master putting the address onto `HADDR` and then waiting until `HREADY` is asserted by the slave. Once `HREADY` is '1', the master reads the data from `HRDATA` and checks `HRESP` to make sure there were no errors. 
+
+<br/>   
+
+**Example of a Basic Read Operation:**
+
+Consider a master wants to read data from the memory address '0x1000'.
+
+1. **Cycle 1**: The master sets `HADDR` to '0x1000' and `HWRITE` to LOW (read operation).
+2. **Cycle 2**: The master waits for `HREADY` to be HIGH (asserted by the slave).
+3. **Cycle 3**: Once `HREADY` is HIGH, the master latches the data from `HRDATA`.
+4. **Cycle 4**: The master checks `HRESP`:
+    - `OKAY`: Transaction successful, master has the data.
+    - `ERROR`: Error occurred, master will retry or handle the error.
+    - `SPLIT`: Slave is busy, master will retry the transaction later.
+    - `RETRY`: Slave suggests to retry the transaction later.
+
+
+<br/> 
+<p align="center">
+  <img src="./images/amba_ahb_block_master_read_graph.jpg" alt="AMBA Basic Read Waveform">
+  <br>
+    <a href="http://contents.kocw.net/KOCW/document/2014/sungkyunkwan/hantaehee/4.pdf">AMBA Basic Read Waveform</a>
+</p>
+<br/> 
+
+The figure above shows that the AHB protocol allows slaves to introduce wait states if they need additional time to complete a transfer. The master must check the `HREADY` signal before proceeding to ensure the slave is ready for the transfer. The `HRESP` signal is also checked to verify the success of the transfer.  
+
+- **Cycle 1**: At the start of the operation, the master presents the address and other control information on the bus. The `HREADY` signal is still high from the previous operation.
+
+- **Cycle 2**: As the next cycle starts, the slave takes control of the `HREADY` signal. The slave deasserts the `HREADY` signal (sets it to low), indicating that it cannot complete the transfer in a single cycle and requires additional time. This period is referred to as a wait state.
+
+- **Cycle 3**: In this cycle, the slave is finally ready. It places the requested data on the `HRDATA` bus, asserts `HREADY` back to high, and indicates a successful transfer with the `HRESP` signal set to 'OKAY'.
+
+- **Cycle 4**: In the final cycle, the master latches the data from the `HRDATA` bus and can initiate a new transfer.
+
+<br/><br/>  
+<!-- omit in toc -->
+### <a name="a"></a> AMBA AHB Basic Write Transaction [<sub><sup>Back to Table of Contents</sup></sub>](#toc)   
+<p align="center">
+  <img src="./images/amba_ahb_block_master_write.jpg" alt="AMBA Basic Write Signals">
+  <br>
+    <a href="http://contents.kocw.net/KOCW/document/2014/sungkyunkwan/hantaehee/4.pdf">AMBA Basic Write Signals</a>
+</p>
+<br/>   
+
+- **HADDR**: During a write operation, the master device identifies the target address for the write and places this address onto the `HADDR` bus.
+  
+- **HWRITE**: This control signal is set by the master to specify the operation type. For a write operation, `HWRITE` is set to HIGH, indicating to the slave device that a write operation is in progress.
+  
+- **HWDATA**: The data to be written by the master device is placed onto the `HWDATA` bus. This bus carries the data from the master to the slave during a write operation.
+
+- **HRDATA**: This bus is used for read operations, allowing the slave to transfer data back to the master. During a write operation, `HRDATA` is not typically used and can be ignored.
+
+- **HREADY**: This signal is driven by the slave device and is used to control the pace of data transfer. When the slave is ready to accept data, it asserts `HREADY` to HIGH. If the slave requires more time to prepare, it can deassert `HREADY` to LOW, which effectively stalls the operation until the slave is ready.
+
+- **HRESP**: The slave uses `HRESP` to communicate the result of the operation to the master once the data transfer is complete. The slave could respond with `OKAY` (indicating that the operation was successful) or `ERROR` (indicating a problem occurred during the operation).
+  
+
+<br/>
+
+Example:
+Suppose the master wants to write the data '1234' to address '0x2000'. It would do this by placing '0x2000' onto `HADDR`, setting `HWRITE` to HIGH, and placing '1234' onto `HWDATA`. The master would then wait for `HREADY` to be asserted to HIGH by the slave, indicating that the slave is ready to accept the data. Once `HREADY` is HIGH, the master checks `HRESP` to see if the operation was successful (i.e., `HRESP` equals `OKAY`). If there was an error (i.e., `HRESP` equals `ERROR`), the master would know that the write operation did not proceed as expected.
+
+
+
+<br/> 
+<p align="center">
+  <img src="./images/amba_ahb_block_master_write_graph.jpg" alt="AMBA Basic Write Waveform">
+  <br>
+    <a href="http://contents.kocw.net/KOCW/document/2014/sungkyunkwan/hantaehee/4.pdf">AMBA Basic Write Waveform</a>
+</p>
+<br/> 
+
+In the above graph:
+
+- **Cycle 1**: During the first cycle, the master starts a write operation by placing the desired address (A) onto the `HADDR` bus. At this point, the `HWRITE` signal is also set to HIGH, indicating that this is a write operation.
+
+- **Cycle 2**: In the second cycle, the master places the actual data (Data(A)) to be written to the address (A) on the `HWDATA` bus. The slave, now ready to accept this data, asserts `HREADY` to HIGH. At the same time, the slave sends an `HRESP` signal of `OKAY`, signifying that the transfer was successful.
+
+The `HWRITE` signal remains HIGH across all cycles, maintaining the operation as a write operation throughout.
+
+<br/><br/>
+<!-- omit in toc -->
 ## <a name="perf_metrics"></a> Performance Metrics and Timing Concepts in Circuits [<sub><sup>Back to Table of Contents</sup></sub>](#toc)
 --- 
 ### Circuit Latency (L)
