@@ -11,7 +11,12 @@
      - [AMBA AHB Slave](#amba-ahb-slave)
      - [AMBA AHB Basic Transfer](#amba-ahb-basic-transfer)
    - [AMBA APB](#amba-apb) 
+     - [AMBA APB Interface](#amba-apb-interface)
      - [AMBA APB Signal List](#amba-apb-signals)
+     - [AMBA APB](#amba-apb-state)
+     - [AMBA APB Read](#amba-apb-read)
+     - [AMBA APB Write](#amba-apb-write)
+  - [AMBA AXI](#amba-axi) 
 -  [Performance Metrics and Timing Concepts in Circuits](#perf_metrics)
    
 <br/>
@@ -433,7 +438,7 @@ The `HWRITE` signal remains HIGH across all cycles, maintaining the operation as
 <br/><br/>
 
 <!-- omit in toc -->
-### <a name="a"></a> AMBA APB [<sub><sup>Back to Table of Contents</sup></sub>](#toc)   
+### <a name="amba-apb"></a> AMBA APB [<sub><sup>Back to Table of Contents</sup></sub>](#toc)   
 The Advanced Peripheral Bus (APB), part of the Advanced Microcontroller Bus Architecture (AMBA) family of protocols, plays a pivotal role in modern microcontroller systems. With its latest iteration being APB v2.0, bundled as part of the AMBA 4 release, APB has evolved to be an optimized interface solution with features such as minimal power consumption and simplified interface complexity.  
   
 <br/>
@@ -529,9 +534,9 @@ The AMBA APB protocol operates in three specific states, each with its unique ro
 These state transitions are synchronized with the clock signal, making the protocol a form of synchronous communication. Each state contributes significantly to facilitating smooth data transfer across the APB bus.
 
 <!-- omit in toc -->
-## <a name="amba-apb-state"></a> AMBA APB Simple Read Transaction [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
+## <a name="amba-apb-read"></a> AMBA APB Simple Read Transaction [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
 <p align="center">
-  <img src="./images/../amba_apb_simple_read.jpg" alt="AMBA APB Simple Read Transaction">
+  <img src="./images/amba_apb_simple_read.jpg" alt="AMBA APB Simple Read Transaction">
   <br>
     <a href="https://verificationforall.wordpress.com/apb-protocol/">AMBA APB Simple Read Transaction</a>
 </p>
@@ -548,7 +553,7 @@ At the same time, the `PREADY` signal, when asserted, signifies that the slave i
 
 <br/><br/>  
 <!-- omit in toc -->
-## <a name="amba-apb-state"></a> AMBA APB Simple Write Transaction [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
+## <a name="amba-apb-write"></a> AMBA APB Simple Write Transaction [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
 <p align="center">
   <img src="./images/amba_apb_simple_write.jpg" alt="AMBA APB Simple Write Transaction">
   <br>
@@ -566,6 +571,26 @@ Also at T3, if there is no subsequent transfer to the same slave, the PSEL signa
 
 > A notable characteristic of the APB protocol is that the slave device has the ability to inject wait states into the transfer process. It can do this by de-asserting the PREADY signal. This essentially "pauses" the transfer, allowing the slave more time to prepare for the completion of the operation. When the slave is ready, it can re-assert PREADY and the transfer can continue.
 
+<br/><br/>
+
+<!-- omit in toc -->
+## <a name="amba-axi"></a> AMBA AXI Overview [<sub><sup>Back to Table of Contents</sup></sub>](#toc)
+--- 
+<p align="center">
+  <img src="./images/amba_axi_block.webp" alt="AMBA AXI Architecture">
+  <br>
+    <a href="https://verificationforall.wordpress.com/apb-protocol/">AMBA AXI Architecture</a>
+</p>
+<br/>
+The Advanced eXtensible Interface (AXI), part of the ARM Advanced Microcontroller Bus Architecture 3 (AMBA 3) and 4 (AMBA 4) specifications, is a parallel high-performance, synchronous, high-frequency, multi-master, multi-slave communication interface, mainly designed for high-speed on-chip communication. It provides high speed and high-performance points-to-points interconnect with multi-layer bus architecture.
+
+One of the most distinguishing features of AXI is its ability to carry out read and write operations simultaneously. This concurrent operation is facilitated by its design, which uses separate channels for read and write operations. Consequently, read and write transactions can be processed independently and simultaneously, leading to improved overall throughput and system performance.
+
+The need for AXI arose from the limitations of traditional bus protocols, such as AHB and APB. While they were suitable for earlier generations of microcontrollers and SOCs with simpler and fewer bus transactions, the increasing complexity of modern SOCs necessitated a more robust and flexible bus protocol, capable of handling a higher bandwidth. AXI, with its separate read and write channels and advanced features, was introduced to meet these demands.
+
+AXI protocol defines five independent transaction channels: Read Address Channel, Read Data Channel, Write Address Channel, Write Data Channel, and Write Response Channel. These channels serve various purposes such as address and control information specification, data return, and transaction status indication. This separation of address/control and data phases, support for outstanding and out-of-order transactions, burst-based transactions, wider data bus configurations, and other features contribute to higher bus efficiency and increased performance.
+
+In conclusion, the AXI interface, with its ability to perform simultaneous read and write operations, its support for multiple transaction channels, and advanced features, provides a highly efficient and robust solution for high-speed on-chip communication in modern SOCs.
 
 <br/><br/>
 <!-- omit in toc -->
