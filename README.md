@@ -174,27 +174,27 @@ Furthermore, AHB employs pipelining and supports burst transfers, enabling it to
 ## <a name="amba-ahb-signals"></a> AMBA AHB Signal List [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
 
 
-| Signal Name  | Source | Description |
-| ------------ | ------ | ----------- |
-| HCLK         | Master | Clock signal, provided by the master. |
-| HRESETn      | Master | Active low reset signal, set by the master to reset the slave. |
-| HADDR[31:0]  | Master | 32-bit address bus, set by the master to specify the target address for the transaction. |
-| HRDATA[31:0] | Slave  | 32-bit read data bus, data presented by the slave for read transactions. |
-| HWDATA[31:0] | Master | 32-bit write data bus, data presented by the master for write transactions. |
-| HWRITE       | Master | Transfer direction signal, set by the master. Read=0, Write=1. |
-| HBURST[2:0]  | Master | 3-bit Burst size indicator, set by the master. Represents burst length from 1 to 8 (0x0=1, 0x1=2, ..., 0x7=8). |
-| HPROT[3:0]   | Master | 4-bit Protection control signal, set by the master. Indicates the type of protection required for the transfer. |
-| HTRANS[1:0]  | Master | 2-bit Transfer type signal, set by the master. (IDLE=0b00, BUSY=0b01, NONSEQ=0b10, SEQ=0b11) |
-| HMASTLOCK    | Master | Lock signal for exclusive access, set by the master. |
-| HREADY       | Slave  | Slave ready signal, set by the slave to indicate it's ready for next data transfer. |
-| HRESP        | Slave  | Response from slave, set by the slave to indicate the status of the transaction (OKAY=0, ERROR=1). |
-| HSIZE[2:0]   | Master | 3-bit Size of bus transfer signal, set by the master. Indicates the width of the data bus used for the transaction. |
-| HBUSREQ      | Master | Bus request signal, set by the master to request bus ownership. |
-| HGRANT       | Slave  | Bus grant signal, set by the arbiter (usually integrated into the slave) in response to the HBUSREQ. |
-| HLOCK        | Master | Lock signal, set by the master to lock the bus for multiple transfers. |
-| HSEL         | Slave  | Select signal for slave, set by the arbiter to indicate the target slave for the current transfer. |
-| HSPLIT[3:0]  | Slave  | 4-bit Split transaction response, set by the slave to request the master to end current transaction and start a new one. |
-| HMASTER[3:0] | Slave  | 4-bit Master ID, set by the arbiter to indicate the ID of the current master. |
+| Signal Name | Source | Destination | Description |
+|-------------|--------|-------------|-------------|
+| HCLK | Clock Source | All Modules | System clock for the bus |
+| HRESETn | Reset Controller | All Modules | Bus reset signal |
+| HADDR[31:0] | Master | Decoder/MUX to Slave/Arbiter | 32-bit system address bus |
+| HTRANS[1:0] | Master | MUX to Slave | Current transfer type (IDLE=00, BUSY=01, NONSEQ=10, SEQ=11) |
+| HWRITE | Master | MUX to Slave | Read/Write indicator (0 for read, 1 for write) |
+| HSIZE[2:0] | Master | MUX to Slave | Size of current transfer (000 for 8-bit, 001 for 16-bit, 010 for 32-bit, etc.) |
+| HBURST[2:0] | Master | MUX to Slave/Arbiter | Burst type (single, incr, wrap) |
+| HPROT[3:0] | Master | MUX to Slave | Protection mechanism (for slaves with protection features) |
+| HWDATA[31:0] | Master | MUX to Slave | Write data bus |
+| HBUSREQx | Master | Arbiter | Bus access request |
+| HLOCKx | Master | Arbiter | Master requires locked access to the bus (no other master should be granted the bus until this signal is low) |
+| HRDATA[31:0] | Slave | MUX to Master/Arbiter | Read data bus |
+| HREADY | Slave | MUX to Master/Arbiter | Signal that indicates the completion of a transfer. Low level extends the transfer cycle |
+| HRESP[1:0] | Slave | MUX to Master/Arbiter | Transfer status (OKAY, ERROR, RETRY, SPLIT) |
+| HSPLITx[15:0] | Slave | Arbiter | Tells the arbiter which master is allowed to retry a split transfer |
+| HSELx | Decoder | Slave | Slave select signal |
+| HGRANTx | Arbiter | Master | This signal indicates that bus master x is currently the highest priority master. A master gets access to the bus when both HREADY and HGRANTx are HIGH |
+| HMASTER[3:0] | Arbiter | Slave with split capability | Indicates which master is performing the transfer, provides information for split operation |
+| HMASTLOCK | Arbiter | Slave with split capability | Indicates that the current master is performing a locked transfer |
 
 <br/><br/>
 ### <a name="amba-ahb-master"></a> AMBA AHB Master [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
