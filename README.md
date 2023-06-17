@@ -18,6 +18,7 @@
      - [AMBA APB Write](#amba-apb-write)
   - [AMBA AXI](#amba-axi) 
 -  [Performance Metrics and Timing Concepts in Circuits](#perf_metrics)
+-  [Clock Gating and Power Gating](#clock-power-gate)
    
 <br/>
 
@@ -513,8 +514,8 @@ The actual operation involves a sequence of signal changes. Typically, the maste
 | PSTRB[3:0]   | Master      | Slave             | Byte-write strobes indicating which bytes of PWDATA to consider during write operation |
 
 
-
-<br/>
+  
+<br/><br/>  
 <!-- omit in toc -->
 ## <a name="amba-apb-state"></a> AMBA APB State [<sub><sup>Back to Table of Contents</sup></sub>](#toc)    
 <p align="center">
@@ -541,7 +542,7 @@ These state transitions are synchronized with the clock signal, making the proto
     <a href="https://verificationforall.wordpress.com/apb-protocol/">AMBA APB Simple Read Transaction</a>
 </p>
 <br/>
-At time marker T1, a READ transfer is initiated. This includes setting the `PADDR` signal with the address to be read, activating `PWRITE` to indicate a read operation, and asserting the appropriate `PSEL` line for the targeted slave. All these signals are latched at the subsequent rising edge of the system clock `PCLK`, signifying the commencement of the SETUP phase of the transfer.
+At time marker T1, a READ transfer is initiated. This includes setting the `PADDR` signal with the address to be read, deactivating `PWRITE` to indicate a read operation, and asserting the appropriate `PSEL` line for the targeted slave. All these signals are latched at the subsequent rising edge of the system clock `PCLK`, signifying the commencement of the SETUP phase of the transfer.
 
 In the interval following T1, during what we refer to as the SETUP phase, the master prepares to grant control to the slave. The address and control signals that were latched onto the bus during T1 are stable and available for the slave to sample.
 
@@ -550,6 +551,7 @@ Following T1, at the time marker T2, the `PENABLE` and `PREADY` signals are regi
 At the same time, the `PREADY` signal, when asserted, signifies that the slave is ready and can complete the transfer on the next rising edge of `PCLK` by furnishing the requested data on the `PRDATA` bus. It's important to note that the slave is required to supply the data prior to the end of the read transfer, specifically, before the time marker T3.
 
 > **Note:** The slave device has the ability to effectively introduce wait states into the APB bus operation by controlling the `PREADY` signal. If the slave is not prepared to receive or transmit data, it can deassert `PREADY`. This action causes the master to wait until `PREADY` is reasserted before proceeding with the data transfer, hence creating a wait state.
+
 
 <br/><br/>  
 <!-- omit in toc -->
@@ -730,8 +732,30 @@ Designers must account for tCQ in the overall timing analysis to ensure that the
 </p>
 
 
-<br/><br/>  
+<br/><br/>
 
+## <a name="clock-power-gate"></a> Clock Gating and Power Gating [<sub><sup>Back to Table of Contents</sup></sub>](#toc)
+Clock Gating and Power Gating are two important techniques used in the design of digital circuits, primarily for reducing the power consumption of a system. Although they both aim for power reduction, they work in different ways and are used in different scenarios.
+
+**Clock Gating**: This technique is used to cut off the clock signal to those parts of a digital circuit that are not currently in use. In digital circuits, dynamic power consumption happens because of the charging and discharging of capacitors, which occurs during the switching of states (0 to 1 or 1 to 0). If a section of a circuit doesn't need to change states (i.e., it's idle or not in use), then cutting off its clock signal will stop these transitions and save dynamic power. Clock gating is often used to save power in fine-grained, short-term scenarios. <br/>
+Clock Gating is like turning off the lights when nobody is in the room. The electricity is still connected (the clock is still connected to the circuit), but it's not being used because the light is off (the clock signal is gated off, so no state transitions occur).
+Power Gating is like not only turning off the lights but also unplugging them from the power source. There's no power consumed at all when the light bulbs are unplugged (similar to circuits being power gated).
+
+**Power Gating**: This method goes a step further by cutting off the power supply to parts of a digital circuit that are not currently in use. Instead of just stopping the clock signal, power gating shuts off the power completely to a portion of the circuit, reducing both dynamic and static (leakage) power consumption. This technique is typically used in coarse-grained, longer-term scenarios (like putting a device into a deep sleep mode). However, it takes a longer time to turn the power back on compared to resuming a clock signal, which can impact the performance if not managed properly. <br/>
+Power Gating is like not only turning off the lights but also unplugging them from the power source. There's no power consumed at all when the light bulbs are unplugged (similar to circuits being power gated).
+
+|                        | Clock Gating                                                                                                                      | Power Gating                                                                                                                                           |
+|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| What it does           | Temporarily stops the clock signal to idle circuits, halting their operation.                                                     | Completely disconnects the power supply to idle circuits, essentially putting them to sleep.                                                          |
+| Power saved            | Mainly dynamic power (associated with switching activities of transistors).                                                       | Both dynamic power (by reducing switching activities) and static/leakage power (by cutting off power supply).                                         |
+| When to use            | Best suited for circuits or components that have short-term idle periods.                                                        | Most effective for circuits or components that have longer idle periods or are less frequently used.                                                  |
+| Implementation complexity | Relatively simpler to implement. Only need to control the clock signal to a component or circuit.                                | More complex. Requires additional components (like power switches, state retention registers etc.) and careful handling of power-up/down sequences. |
+| Impact on performance  | Lower. The component can quickly resume operation once the clock signal is re-enabled.                                           | Higher. Waking up a power-gated component involves restoring power and saved state, which can take considerable time.                                 |
+| Real-world example in SoC | Often used in CPU cores when they're waiting for data or in between instruction executions to save power.                       | Used for turning off entire functional blocks, like a DSP or a GPU, when they're not in use.                                                           |
+
+Both methods have their trade-offs. Clock gating is simpler to implement and incurs less performance overhead, but it only reduces dynamic power. Power gating can reduce both dynamic and static power, but it's more complex to implement and manage due to issues like power-up/down time, state retention, and more. A combination of both techniques is often used in modern digital designs for optimal power savings.
+
+<br/><br/>
 ## Verilog Training
 1. [HDLbits](https://hdlbits.01xz.net) 
 2. [chipdev.io](https://chipdev.io/)
